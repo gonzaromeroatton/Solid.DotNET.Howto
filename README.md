@@ -1,50 +1,36 @@
-# Solid.DotNET.Howto
+Este proyecto muestra ejemplos sencillos de cómo aplicar los principios de SOLID en C# mediante ejemplos "buenos" y "malos" que destacan las diferencias entre una mala y una buena implementación.
 
-Este proyecto muestra ejemplos sencillos de cómo aplicar el principio de Responsabilidad Única (Single Responsibility Principle - SRP) en C# siguiendo SOLID. Contiene ejemplos "malos" y "buenos" que facilitan comparar cómo separar responsabilidades correctamente.
+## Principios incluidos en el proyecto
 
-## Estructura del repositorio (relevante)
+### Single Responsibility Principle (SRP)
+El principio de responsabilidad única establece que una clase debe tener una, y solo una, razón para cambiar. Estas responsabilidades deben ser completamente necesarias para describir el propósito de la clase.
 
-- Solid.DotNET.Howto/1.SRP/
-  - Bad/
-    - InvoiceService.cs                # Ejemplo que viola SRP (valida, persiste y registra en un único tipo)
-  - Good/
-    - Interface/ILogger.cs             # Interfaz para logging
-    - Interface/IInvoiceRepository.cs  # Interfaz para persistencia de facturas
-    - InvoiceService.cs                # Servicio que cumple SRP mediante inyección de dependencias
+- Ejemplo "malo": La clase `InvoiceService` realiza múltiples tareas como validación, persistencia y logging en una sola clase.
+- Ejemplo "bueno": Una solución que incluye las interfaces `IInvoiceRepository` e `ILogger`, delegando responsabilidades específicas.
 
-> Archivos clave:
-> - `1.SRP/Bad/InvoiceService.cs` : mezcla validación, persistencia y logging en una sola clase.
-> - `1.SRP/Good/InvoiceService.cs` : delega persistencia y logging a `IInvoiceRepository` e `ILogger` respectivamente.
+### Open-Closed Principle (OCP)
+El principio de abierto/cerrado establece que los módulos de software deben estar abiertos a la extensión pero cerrados a la modificación, lo que fomenta la reutilización y reduce el riesgo a errores al cambiar el código existente.
 
-## Qué enseña el ejemplo
+- Ejemplo "malo": La clase `Discounts` calcula distintos tipos de descuentos con un `switch` basado en cadenas de texto.
+- Ejemplo "bueno": La clase `Discounts` implementa una interfaz común `IDiscount`, permitiendo agregar nuevos tipos de descuentos sin modificar la lógica ya existente.
 
-- Por qué la clase `InvoiceService` del ejemplo "Bad" viola SRP:
-  - Tiene más de una razón para cambiar: reglas de validación, detalles de almacenamiento y lógica de logging.
-  - Está acoplada a detalles de implementación (guardar en base de datos, escribir en fichero).
+### Liskov Substitution Principle (LSP)
+El principio de sustitución de Liskov indica que los objetos deben ser reemplazables por instancias de sus subtipos sin alterar el comportamiento esperado del programa.
 
-- Cómo lo corrije el ejemplo "Good":
-  - Se define una interfaz `IInvoiceRepository` para la responsabilidad de persistencia.
-  - Se define una interfaz `ILogger` para la responsabilidad de logging.
-  - `InvoiceService` sólo contiene la lógica de negocio (validación y orquestación) y delega las otras responsabilidades.
-  - Así, cada componente tiene una única razón para cambiar (SRP) y el código es más testeable y mantenible.
+- Ejemplo "malo": La clase `Ostrich` (avestruz) hereda de `Bird` pero lanza una excepción al intentar volar, violando el principio.
+- Ejemplo "bueno": Se definen interfaces específicas como `IFlyingBird` para cumplir adecuadamente este principio.
 
-## Ejemplo de uso (extracto)
+## Ejemplo de estructura
 
-```csharp
-// Implementaciones sencillas para ejemplo
-public class ConsoleLogger : Solid.DotNET.Howto._1.SRP.Good.Interface.ILogger
-{
-    public void Log(string message) => Console.WriteLine(message);
-}
+```
+Solid.DotNET.Howto
+├── 1.SRP
+│   ├── Bad
+│   │   └── InvoiceService.cs
+│   ├── Good
+│       ├── Interface
+│       │   └── ...
 
-public class InMemoryInvoiceRepository : Solid.DotNET.Howto._1.SRP.Good.Interface.IInvoiceRepository
-{
-    private readonly List<decimal> _store = new();
-    public void Save(decimal amount) => _store.Add(amount);
-}
+├── 2.OCP...
 
-// Uso
-var repository = new InMemoryInvoiceRepository();
-var logger = new ConsoleLogger();
-var service = new Solid.DotNET.Howto._1.SRP.Good.InvoiceService(repository, logger);
-service.CreateInvoice(100m);
+```
